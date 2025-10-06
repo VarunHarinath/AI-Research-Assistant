@@ -2,6 +2,7 @@ import pika
 import json
 import os
 from dotenv import load_dotenv
+from agent.Agent import LangchainAgent
 
 load_dotenv()
 
@@ -10,6 +11,7 @@ class Rpc:
         self.params = pika.URLParameters(os.getenv("URL"))
         self.connection = pika.BlockingConnection(self.params)
         self.channel = self.connection.channel()
+        self.agent = LangchainAgent()
 
     def QueueDeclareAndBind(self):
         self.channel.exchange_declare(
@@ -24,9 +26,10 @@ class Rpc:
 
     def callback(self, ch, method, properties, body):
         job = json.loads(body)
-        print("Received job:", job)
+        # print("Received job:", job)
+        reply = self.agent.invoke_agent(job)
 
-        result = {"message": "received"}
+        result = {"message": reply}
 
         # Ensure reply_to exists and is a string
         if properties.reply_to and isinstance(properties.reply_to, str):
