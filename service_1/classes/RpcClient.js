@@ -25,30 +25,36 @@ class Rpc {
   async sendAndRecieveRpc() {
     try {
       const generateCorrelationId = uuidv4();
-      // Creating an Empty Queue
       const { queue: replyQueue } = await this.channel.assertQueue("", {
         exclusive: true,
-      });
-      // Receving The job
-      this.channel.consume(replyQueue, (msg) => {
-        if (msg.properties.correlationId === generateCorrelationId) {
-          const result = JSON.parse(msg.content.toString());
-          this.connection.close();
-        }
+        autoDelete: true,
       });
 
-      // Sending the job
       this.channel.publish(
         this.#EXCHANGE,
         "summarize",
-        Buffer.from(JSON.stringify(this.job), {
+        Buffer.from(JSON.stringify(this.job)),
+        {
           replyTo: replyQueue,
           correlationId: generateCorrelationId,
-        })
+        }
       );
-      console.log("The job has been sent", this.job);
+
+      console.log("Job sent:", this.job);
+
+      this.channel.consume(
+        replyQueue,
+        (msg) => {
+          if (msg.properties.correlationId === generateCorrelationId) {
+            const result = JSON.parse(msg.content.toString());
+            console.log("Received response:", result);
+            this.connection.close();
+          }
+        },
+        { noAck: true }
+      );
     } catch (error) {
-      console.log(error);
+      console.error("Error in sendAndRecieveRpc:", error);
     }
   }
 }
