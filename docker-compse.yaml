@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  service_1:
+    build: "./service_1"
+    container_name: "service_1"
+    env_file:
+      - "./service_1/.env"
+    ports:
+      - 8080:8080
+    volumes:
+      - "./service_1:/service_1"
+    networks:
+      - ai_net
+
+  service_2:
+    build: "./service_2"
+    container_name: "service_2"
+    env_file:
+      - "./service_2/.env"
+    ports:
+      - 8000:8000
+    volumes:
+      - "./service_2:/service_2"
+    networks:
+      - ai_net
+
+networks:
+  ai_net:
+    driver: "bridge"
