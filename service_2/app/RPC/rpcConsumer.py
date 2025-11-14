@@ -2,7 +2,7 @@ import pika
 import json
 import os
 from dotenv import load_dotenv
-from agent.Agent import LangchainAgent
+from app.agent.Agent import LangchainAgent
 
 load_dotenv()
 

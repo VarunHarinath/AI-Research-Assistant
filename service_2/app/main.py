@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from RPC.rpcConsumer import Rpc
+from app.RPC.rpcConsumer import Rpc
 import threading
 
-app = FastAPI(title="Ai research Assistant")
 
 rpc_worker = Rpc()
 
@@ -15,8 +14,8 @@ async def lifespan(app: FastAPI):
     thread.start()
     yield
 
-app.router.lifespan = lifespan
     
+app = FastAPI(title="Ai research Assistant",lifespan=lifespan)
 
 @app.get("/")
 def home():
